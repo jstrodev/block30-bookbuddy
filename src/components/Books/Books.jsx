@@ -1,5 +1,5 @@
-import { useGetBooksQuery } from "./BooksSlice";
-import { Link } from "react-router-dom";
+import { useGetBooksQuery } from "./BooksSlice"
+import { Link } from 'react-router-dom';
 
 const Books = () => {
   const { data: books, isLoading, isSuccess } = useGetBooksQuery();

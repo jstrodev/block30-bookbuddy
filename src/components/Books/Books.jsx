@@ -1,8 +1,11 @@
-import { useGetBooksQuery } from './booksSlice';
+import { useGetBooksQuery } from './BooksSlice';
 import { Link } from 'react-router-dom';
 
 const Books = () => {
   const { data: books, isLoading, isSuccess } = useGetBooksQuery();
+
+
+  // console.log(books, isLoading, isSuccess);
 
   return (
     <div>

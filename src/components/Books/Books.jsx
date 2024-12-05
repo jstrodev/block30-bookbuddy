@@ -12,6 +12,8 @@ const Books = () => {
       <Link to="/Signup">Click here to sign up</Link>
       <h2>Log In</h2>
       <Link to="/Login">Click here to log in</Link>
+      <h2>Account Page </h2>
+      <Link to="/Account">This is to check progress (delete later)</Link>
     </div>
   );
 };

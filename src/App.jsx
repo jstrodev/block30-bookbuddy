@@ -4,6 +4,7 @@ import Login from './components/Login';
 import SingleBook from './components/SingleBook';
 import Books from './components/Books/Books';
 import Register from './components/Register';
+import Signup from './components/Signup';
 // import { useState } from 'react';
 // import bookLogo from './assets/books.png';
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/Account" element={<Account />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Register" element={<Register />} />
+          <Route path="/Signup" element={<Signup />} />
         </Routes>
       </Router>
     </>

@@ -12,5 +12,4 @@ const booksApi = api.injectEndpoints({
   }),
 });
 
-
 export const { useGetBooksQuery } = booksApi;

@@ -10,6 +10,8 @@ const Books = () => {
       <h1>Home Page</h1>
       <h2>Sign Up</h2>
       <Link to="/Signup">Click here to sign up</Link>
+      <h2>Log In</h2>
+      <Link to="/Login">Click here to log in</Link>
     </div>
   );
 };

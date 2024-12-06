@@ -6,7 +6,7 @@ const Books = () => {
   
   console.log(books, isLoading, isSuccess)
   const bookList = books?.books;
-  console.log("books:" ,books);
+  console.log("books:" ,books)
 
   return (
     <>

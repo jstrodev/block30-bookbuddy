@@ -24,6 +24,10 @@ body {
 }
 
 /*For main page nav bar - begin*/
+.button{
+  padding: 10px;
+}
+
 .topnav {
   overflow: hidden;
   background-color: #e9e9e9;

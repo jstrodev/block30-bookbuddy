@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Account from './components/Account';
+import Account from './components/Account/AccountPage';
 import Login from './components/Login';
 import SingleBook from './components/SingleBook';
 import Books from './components/Books/Books';

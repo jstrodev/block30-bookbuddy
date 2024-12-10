@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './AccountStyles.css'; // Import the CSS file
 
 const Account = () => {
   // "var" for user info (information is retrieved from localStorage)
@@ -20,7 +21,7 @@ const Account = () => {
 
   return (
     // title of the page to identify by id
-    <div>
+    <div className="account-page">
       <h1>Account Page</h1>
       {/* displays the required user info (username or email inputted) */}
       <div>

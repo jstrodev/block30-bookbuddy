@@ -7,24 +7,32 @@
  */
 
 import React, { useState } from 'react';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
+import { useNavigate } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
 import './AuthStyles.css';
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true); // State to toggle between login and register forms
+    const navigate = useNavigate();
 
     return (
-        <div className="auth-container">
-            <h2>{isLogin ? "Login" : "Sign Up"}</h2>
-            {/* Render LoginForm or RegisterForm based on isLogin state */}
-            {isLogin ? <LoginForm /> : <RegisterForm />}
-            <button 
-                className="toggle-button" 
-                onClick={() => setIsLogin(!isLogin)} // Toggle the state
-            >
-                {isLogin ? "Switch to Sign Up" : "Switch to Login"}
-            </button>
+        <div>
+            <nav>
+                <button onClick={() => navigate('/')}>Home</button>
+                {/* ...other nav items... */}
+            </nav>
+            <div className="auth-container">
+                <h2>{isLogin ? "Login" : "Sign Up"}</h2>
+                {/* Render LoginForm or RegisterForm based on isLogin state */}
+                {isLogin ? <Login /> : <Register />}
+                <button 
+                    className="toggle-button" 
+                    onClick={() => setIsLogin(!isLogin)} // Toggle the state
+                >
+                    {isLogin ? "Switch to Sign Up" : "Switch to Login"}
+                </button>
+            </div>
         </div>
     );
 };

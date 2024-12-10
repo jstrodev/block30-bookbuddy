@@ -8,8 +8,11 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // For prototype purposes, we assume registration is always successful
-    navigate('/Login');
+    // Save user data to localStorage for prototype purposes
+    const userData = { username, password };
+    localStorage.setItem('user', JSON.stringify(userData));
+    // Navigate to AuthPage with login view
+    navigate('/AuthPage', { state: { isLogin: true } });
   };
 
   return (

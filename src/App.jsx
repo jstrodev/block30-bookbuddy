@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import Register from './components/Authentication/Register';
 import Signup from './components/Signup';
 import AuthPage from './components/Authentication/AuthPage';
+import NotFound from './pages/NotFound'; 
 import { useState, useEffect } from 'react';
 
 function App() {
@@ -39,7 +40,8 @@ function App() {
           <Route path="/Login" element={<Login onLogin={handleLogin} />} />
           <Route path="/Register" element={<Register />} />
           <Route path="/Signup" element={<Signup />} />
-          <Route path="/AuthPage" element={<AuthPage />} />
+          <Route path="/AuthPage" element={<AuthPage onLogin={handleLogin} />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </>

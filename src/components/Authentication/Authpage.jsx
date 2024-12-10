@@ -6,15 +6,22 @@
  * It serves as the primary authentication entry point for users.
  */
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 import './AuthStyles.css';
 
-const AuthPage = () => {
+const AuthPage = ({ onLogin }) => { // Add onLogin prop here
     const [isLogin, setIsLogin] = useState(true); // State to toggle between login and register forms
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state && location.state.isLogin !== undefined) {
+            setIsLogin(location.state.isLogin);
+        }
+    }, [location.state]);
 
     return (
         <div>
@@ -25,7 +32,7 @@ const AuthPage = () => {
             <div className="auth-container">
                 <h2>{isLogin ? "Login" : "Sign Up"}</h2>
                 {/* Render LoginForm or RegisterForm based on isLogin state */}
-                {isLogin ? <Login /> : <Register />}
+                {isLogin ? <Login onLogin={onLogin} /> : <Register />}
                 <button 
                     className="toggle-button" 
                     onClick={() => setIsLogin(!isLogin)} // Toggle the state

@@ -1,76 +1,115 @@
-/* TODO - add your code to create a functional React component that renders details for a single book. Fetch the book data from the provided API. You may consider conditionally rendering a 'Checkout' button for logged in users. */
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectCurrentToken } from '../redux/slices/authSlice';
+import { useGetBookByIdQuery, useUpdateBookMutation } from '../redux/slices/bookSlice';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-export default function SingleBook({ reservedBooks, setReservedBooks }) {
-  const [book, setBook] = useState(null);
+const SingleBook = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const token = useSelector(selectCurrentToken);
+  
+  const { data: book, isLoading, error } = useGetBookByIdQuery(id);
+  const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
-  //Grabs the books from the api
-
-  useEffect(() => {
-    if (id) {
-      async function fetchBook() {
-        try {
-          const response = await fetch(
-            `https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api/books/${id}`
-          );
-          const result = await response.json();
-          setBook(result);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      fetchBook();
+  const handleBookAction = async () => {
+    if (!token) {
+      navigate('/login');
+      return;
     }
-  }, [id]);
 
-  //Checks if the selected book id matches the id of any reserved book
-
-  const reserveBook = () => {
-    if (book) {
-      const isAlreadyReserved = reservedBooks.some(
-        (reservedBook) => reservedBook.id === book.book.id
-      );
-      if (!isAlreadyReserved) {
-        setReservedBooks([...reservedBooks, book.book]);
-      } else {
-        alert('This book is already reserved.');
-      }
+    try {
+      await updateBook({
+        bookId: id,
+        available: !book.available
+      }).unwrap();
+    } catch (err) {
+      console.error('Failed to update book:', err);
     }
   };
 
-  return (
-    <div>
-      {book ? (
-        <div>
-          <h2>{book.book.title} Details</h2>
-          <p>
-            Cover: <img src={book.book.coverimage} alt="{book.book.title}" />
-          </p>
-          <p>Title: {book.book.title}</p>
-          <p>Author: {book.book.author}</p>
-          <p>
-            Availability: {book.book.available ? 'Available' : 'Not Available'}
-          </p>
-          <p>Description: {book.book.description}</p>
-          <Link to="/">
-            <button>Back to Book List</button>
-          </Link>
-          <button
-            onClick={reserveBook}
-            style={{
-              opacity: isAlreadyReserved ? 0 : 1,
-              transition: 'opacity 0.5s ease',
-            }}
-            disabled={isAlreadyReserved}
-          >
-            Reserve this book
-          </button>
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
         </div>
-      ) : (
-        <p>Loading...</p>
-      )}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error.data?.message || 'Failed to load book details'}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{book.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <img 
+                src={book.coverimage} 
+                alt={book.title}
+                className="w-full rounded-lg shadow-lg"
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">Author</h3>
+                <p>{book.author}</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold">Description</h3>
+                <p>{book.description}</p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold">Status</h3>
+                <p>{book.available ? 'Available' : 'Checked Out'}</p>
+              </div>
+
+              {token && (
+                <Button
+                  onClick={handleBookAction}
+                  disabled={isUpdating}
+                  variant={book.available ? "default" : "secondary"}
+                >
+                  {isUpdating ? 'Processing...' : 
+                    book.available ? 'Check Out Book' : 'Return Book'}
+                </Button>
+              )}
+
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="ml-2"
+              >
+                Back to Books
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default SingleBook;

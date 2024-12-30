@@ -1,70 +1,74 @@
 /**
  * authSlice.js
- * 
+ *
  * Purpose:
- * Handles authentication state with JWT. Manages the user's login status and 
+ * Handles authentication state with JWT. Manages the user's login status and
  * token storage, and provides actions for login and logout.
  */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import authApi from '../api/authApi';
+// src/features/auth/authSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, thunkAPI) => {
-    try {
-        const response = await authApi.login(credentials);
-        const { token, username } = response.data;
-        localStorage.setItem('token', token); // Store the JWT in localStorage
-        return { token, username };
-    } catch (error) {
-        return thunkAPI.rejectWithValue(error.message);
-    }
-});
+const initialState = {
+  user: null,
+  token: localStorage.getItem('token') || null,
+};
 
-export const registerUser = createAsyncThunk('auth/registerUser', async (userData, thunkAPI) => {
-    try {
-        const response = await authApi.register(userData);
-        const { token, username } = response.data;
-        localStorage.setItem('token', token); // Store the JWT in localStorage
-        return { token, username };
-    } catch (error) {
-        return thunkAPI.rejectWithValue(error.message);
-    }
+export const authApi = createApi({
+  reducerPath: "authApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api",
+  }),
+  endpoints: (builder) => ({
+    login: builder.mutation({
+      query: (credentials) => ({
+        url: "/users/login",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    register: builder.mutation({
+      query: (credentials) => ({
+        url: "/users/register",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    getMe: builder.query({
+      query: () => ({
+        url: "/users/me",
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }),
+    }),
+  }),
 });
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState: {
-        user: null,
-        token: null,
-        error: null,
+  name: "auth",
+  initialState,
+  reducers: {
+    setCredentials: (state, action) => {
+      const { user, token } = action.payload;
+      state.user = user;
+      state.token = token;
+      localStorage.setItem("token", token);
     },
-    reducers: {
-        logout(state) {
-            state.user = null;
-            state.token = null;
-            localStorage.removeItem('token'); // Clear the JWT
-        },
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem("token");
     },
-    extraReducers: (builder) => {
-        builder
-            .addCase(loginUser.fulfilled, (state, action) => {
-                state.user = action.payload.username;
-                state.token = action.payload.token;
-                state.error = null;
-            })
-            .addCase(loginUser.rejected, (state, action) => {
-                state.error = action.payload;
-            })
-            .addCase(registerUser.fulfilled, (state, action) => {
-                state.user = action.payload.username;
-                state.token = action.payload.token;
-                state.error = null;
-            })
-            .addCase(registerUser.rejected, (state, action) => {
-                state.error = action.payload;
-            });
-    },
+  },
 });
 
-export const { logout } = authSlice.actions;
+export const { setCredentials, logout } = authSlice.actions;
+
+export const selectCurrentUser = (state) => state?.auth?.user ?? null;
+export const selectCurrentToken = (state) => state?.auth?.token ?? null;
+
+export const { useLoginMutation, useRegisterMutation, useGetMeQuery } = authApi;
+
 export default authSlice.reducer;

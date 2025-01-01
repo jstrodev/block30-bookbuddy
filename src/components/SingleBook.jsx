@@ -1,30 +1,46 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken } from '../redux/slices/authSlice';
-import { useGetBookByIdQuery, useUpdateBookMutation } from '../redux/slices/bookSlice';
+import {
+  useGetBookByIdQuery,
+  useUpdateBookMutation,
+  useRemoveReservationMutation,
+} from '../redux/slices/bookSlice';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useGetMeQuery } from '../redux/slices/authSlice';
 
 const SingleBook = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
-  
+
   const { data: book, isLoading, error } = useGetBookByIdQuery(id);
   const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
+  const [returnBook] = useRemoveReservationMutation();
+  const { data: userData } = useGetMeQuery();
 
   const handleBookAction = async () => {
     if (!token) {
       navigate('/login');
       return;
     }
-
+    console.log(book);
     try {
-      await updateBook({
-        bookId: id,
-        available: !book.available
-      }).unwrap();
+      if (!book.available) {
+        const foundReservation = userData.books.find(
+          (b) => b.title === book.title
+        );
+        await returnBook({
+          reservationId: foundReservation.id,
+        }).unwrap();
+      } else {
+        await updateBook({
+          bookId: id,
+          available: !book.available,
+        }).unwrap();
+      }
     } catch (err) {
       console.error('Failed to update book:', err);
     }
@@ -64,8 +80,8 @@ const SingleBook = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <img 
-                src={book.coverimage} 
+              <img
+                src={book.coverimage}
                 alt={book.title}
                 className="w-full rounded-lg shadow-lg"
               />
@@ -75,12 +91,12 @@ const SingleBook = () => {
                 <h3 className="text-lg font-semibold">Author</h3>
                 <p>{book.author}</p>
               </div>
-              
+
               <div>
                 <h3 className="text-lg font-semibold">Description</h3>
                 <p>{book.description}</p>
               </div>
-              
+
               <div>
                 <h3 className="text-lg font-semibold">Status</h3>
                 <p>{book.available ? 'Available' : 'Checked Out'}</p>
@@ -90,10 +106,13 @@ const SingleBook = () => {
                 <Button
                   onClick={handleBookAction}
                   disabled={isUpdating}
-                  variant={book.available ? "default" : "secondary"}
+                  variant={book.available ? 'default' : 'secondary'}
                 >
-                  {isUpdating ? 'Processing...' : 
-                    book.available ? 'Check Out Book' : 'Return Book'}
+                  {isUpdating
+                    ? 'Processing...'
+                    : book.available
+                    ? 'Check Out Book'
+                    : 'Return Book'}
                 </Button>
               )}
 

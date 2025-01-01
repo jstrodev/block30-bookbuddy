@@ -7,8 +7,8 @@
  */
 
 // src/features/auth/authSlice.js
-import { createSlice } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createSlice } from '@reduxjs/toolkit';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const initialState = {
   user: null,
@@ -16,30 +16,30 @@ const initialState = {
 };
 
 export const authApi = createApi({
-  reducerPath: "authApi",
+  reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api",
+    baseUrl: 'https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api',
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: "/users/login",
-        method: "POST",
+        url: '/users/login',
+        method: 'POST',
         body: credentials,
       }),
     }),
     register: builder.mutation({
       query: (credentials) => ({
-        url: "/users/register",
-        method: "POST",
+        url: '/users/register',
+        method: 'POST',
         body: credentials,
       }),
     }),
     getMe: builder.query({
       query: () => ({
-        url: "/users/me",
+        url: '/users/me',
         headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
+          authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
     }),
@@ -47,19 +47,19 @@ export const authApi = createApi({
 });
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     setCredentials: (state, action) => {
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;
-      localStorage.setItem("token", token);
+      localStorage.setItem('token', token);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem("token");
+      localStorage.removeItem('token');
     },
   },
 });

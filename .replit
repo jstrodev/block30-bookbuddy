@@ -1,0 +1,14 @@
+run = "npm install && npm run dev"
+hidden = [".config", "package-lock.json"]
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+
+[languages.javascript.languageServer]
+start = [ "typescript-language-server", "--stdio" ]
+
+[env]
+XDG_CONFIG_HOME = "/home/runner/.config"
+
+[nix]
+channel = "stable-22_11" 

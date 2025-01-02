@@ -1,15 +1,15 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectCurrentToken } from '../redux/slices/authSlice';
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "../redux/slices/authSlice";
 import {
   useGetBookByIdQuery,
   useUpdateBookMutation,
   useRemoveReservationMutation,
-} from '../redux/slices/bookSlice';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useGetMeQuery } from '../redux/slices/authSlice';
+} from "../redux/slices/bookSlice";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useGetMeQuery } from "../redux/slices/authSlice";
 
 const SingleBook = () => {
   const { id } = useParams();
@@ -23,18 +23,17 @@ const SingleBook = () => {
 
   const handleBookAction = async () => {
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
-    console.log(book);
     try {
       if (!book.available) {
         const foundReservation = userData.books.find(
-          (b) => b.title === book.title
+          (b) => b.id === parseInt(id)
         );
-        await returnBook({
-          reservationId: foundReservation.id,
-        }).unwrap();
+        if (foundReservation) {
+          await returnBook(foundReservation.id).unwrap();
+        }
       } else {
         await updateBook({
           bookId: id,
@@ -42,7 +41,7 @@ const SingleBook = () => {
         }).unwrap();
       }
     } catch (err) {
-      console.error('Failed to update book:', err);
+      console.error("Failed to update book:", err);
     }
   };
 
@@ -64,7 +63,7 @@ const SingleBook = () => {
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error.data?.message || 'Failed to load book details'}
+            {error.data?.message || "Failed to load book details"}
           </AlertDescription>
         </Alert>
       </div>
@@ -99,25 +98,21 @@ const SingleBook = () => {
 
               <div>
                 <h3 className="text-lg font-semibold">Status</h3>
-                <p>{book.available ? 'Available' : 'Checked Out'}</p>
+                <p>{book.available ? "Available" : "Checked Out"}</p>
               </div>
 
-              {token && (
+              {token && book.available && (
                 <Button
                   onClick={handleBookAction}
                   disabled={isUpdating}
-                  variant={book.available ? 'default' : 'secondary'}
+                  variant="default"
                 >
-                  {isUpdating
-                    ? 'Processing...'
-                    : book.available
-                    ? 'Check Out Book'
-                    : 'Return Book'}
+                  {isUpdating ? "Processing..." : "Check Out Book"}
                 </Button>
               )}
 
               <Button
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 variant="outline"
                 className="ml-2"
               >

@@ -7,59 +7,91 @@
  */
 
 // src/features/auth/authSlice.js
-import { createSlice } from '@reduxjs/toolkit';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createSlice } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const initialState = {
   user: null,
-  token: localStorage.getItem('token') || null,
+  token: localStorage.getItem("token") || null,
 };
 
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api',
+    baseUrl: "https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api",
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth.token;
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: '/users/login',
-        method: 'POST',
+        url: "/users/login",
+        method: "POST",
         body: credentials,
       }),
     }),
     register: builder.mutation({
       query: (credentials) => ({
-        url: '/users/register',
-        method: 'POST',
+        url: "/users/register",
+        method: "POST",
         body: credentials,
       }),
+      transformResponse: (response) => {
+        return {
+          user: response.user,
+          token: response.token,
+        };
+      },
+      invalidatesTags: ["User"],
     }),
     getMe: builder.query({
       query: () => ({
-        url: '/users/me',
+        url: "/users/me",
         headers: {
-          authorization: `Bearer ${localStorage.getItem('token')}`,
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       }),
+      providesTags: ["User"],
+    }),
+    returnBook: builder.mutation({
+      query: (bookId) => ({
+        url: `/reservations/${bookId}`,
+        method: "DELETE",
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }),
+      invalidatesTags: ["User", "Books"],
+    }),
+    checkoutBook: builder.mutation({
+      query: (bookId) => ({
+        url: `/books/${bookId}/checkout`,
+        method: "POST",
+      }),
+      invalidatesTags: ["User"],
     }),
   }),
 });
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (state, action) => {
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     },
   },
 });
@@ -69,6 +101,12 @@ export const { setCredentials, logout } = authSlice.actions;
 export const selectCurrentUser = (state) => state?.auth?.user ?? null;
 export const selectCurrentToken = (state) => state?.auth?.token ?? null;
 
-export const { useLoginMutation, useRegisterMutation, useGetMeQuery } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetMeQuery,
+  useReturnBookMutation,
+  useCheckoutBookMutation,
+} = authApi;
 
 export default authSlice.reducer;
